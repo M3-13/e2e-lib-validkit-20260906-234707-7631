@@ -11,6 +11,7 @@ import inspect
 import pytest
 
 import validkit
+from validkit._validation import MAX_TEXT_LENGTH, _check_text
 
 EXPECTED_SIGNATURES = {
     "is_valid_email": "(text: str) -> bool",
@@ -55,3 +56,17 @@ def test_function_is_callable(name):
 def test_function_has_contract_signature(name):
     func = getattr(validkit, name)
     assert str(inspect.signature(func)) == EXPECTED_SIGNATURES[name]
+
+
+def test_check_text_accepts_exactly_max_length():
+    _check_text("x" * MAX_TEXT_LENGTH, "value")
+
+
+def test_check_text_rejects_longer_than_max_length():
+    with pytest.raises(ValueError):
+        _check_text("x" * (MAX_TEXT_LENGTH + 1), "value")
+
+
+def test_check_text_rejects_non_string():
+    with pytest.raises(TypeError):
+        _check_text(123, "value")
